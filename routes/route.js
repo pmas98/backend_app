@@ -5,6 +5,8 @@ const router = express.Router();
 const createUser = require("../services/createUser.js")
 const signInWithEmailAndPassword = require("../services/loginUser.js");
 const refreshToken = require("../services/refreshToken.js");
+const qr = require('qrcode');
+const fs = require('fs');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -377,32 +379,28 @@ router.delete("/expo", async (req,res) => {
  * @swagger
  * /obra:
  *   get:
- *     summary: Get all obra objects
- *     description: Endpoint to retrieve all obra objects.
+ *     summary: Get an obra by ID
+ *     description: Retrieve an obra from the Firestore collection based on the provided ID.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The ID of the obra to retrieve.
+ *         schema:
+ *           type: string
  *     responses:
  *       '200':
- *         description: Successful operation.
+ *         description: Successful response. Returns the requested obra.
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: The ID of the obra object.
- *                   ... (other properties)
+ *               $ref: '#/components/schemas/Obra'
+ *       '400':
+ *         description: Bad request - ID is missing.
+ *       '404':
+ *         description: Obra not found.
  *       '500':
- *         description: Failed to get obra objects.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
+ *         description: Internal Server Error - Failed to get obra.
  */
 router.get("/obra", async (req, res) => {
     try {
@@ -415,6 +413,55 @@ router.get("/obra", async (req, res) => {
         return res.status(500).json({ error: "Failed to get objects." });
     }
 })
+
+
+/**
+ * @swagger
+ * /obra?id:
+ *   get:
+ *     summary: Get an obra by ID
+ *     description: Retrieve an obra from the Firestore collection based on the provided ID.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The ID of the obra to retrieve.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Successful response. Returns the requested obra.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Obra'
+ *       '400':
+ *         description: Bad request - ID is missing.
+ *       '404':
+ *         description: Obra not found.
+ *       '500':
+ *         description: Internal Server Error - Failed to get obra.
+ */
+router.get("/obra", async (req, res) => {
+    try {
+        const id = req.query.id; // Retrieve the ID from the query parameter
+        if (!id) {
+            return res.status(400).json({ error: "ID is required" });
+        }
+
+        const obraDoc = await admin.firestore().collection("obra").doc(id).get();
+        if (!obraDoc.exists) {
+            return res.status(404).json({ error: "Obra not found" });
+        }
+
+        const obraData = obraDoc.data();
+        return res.status(200).json({ id: obraDoc.id, ...obraData });
+    } catch (error) {
+        console.error("Error getting obra:", error);
+        return res.status(500).json({ error: "Failed to get obra." });
+    }
+});
+
 /**
  * @swagger
  * /obra:
@@ -754,6 +801,62 @@ router.delete("/obra", async (req,res) => {
     } catch (error) {
         console.error("Error deleting object:", error);
         res.status(500).json({ error: "Failed to delete object." });
+    }
+})
+
+/**
+ * @swagger
+ * /qrcode:
+ *   get:
+ *     summary: Generate QR code
+ *     description: Generate a QR code based on the provided ID.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The ID to be encoded in the QR code.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: QR code generated successfully.
+ *       '400':
+ *         description: Bad request - ID is missing.
+ *       '500':
+ *         description: Internal Server Error - Failed to generate QR code.
+ */
+router.get("/qrcode", async (req, res) => {
+    try {
+        const id = req.query.id; // Retrieve the ID from the query parameter
+        if (!id) {
+          return res.status(400).json({ error: "ID is required" });
+        }
+    
+        const jsonData = {
+            id: id,
+          };
+          const jsonString = JSON.stringify(jsonData);
+
+          // Options for QR code generation
+          const options = {
+            errorCorrectionLevel: 'H', // Higher error correction level
+            type: 'png', // Output type (png, svg, etc.)
+            quality: 5, // Image quality factor
+            margin: 1, // White space around the QR code
+          };
+        
+          // Generate the QR code
+          qr.toFileStream(res, jsonString, options, (err) => {
+            if (err) {
+              console.error('Error generating QR code:', err);
+              res.status(500).send('Internal Server Error');
+            } else {
+                console.log('QR code generated successfully!');
+                res.sendFile(jsonString);            }
+          });
+    } catch (error) {
+        console.error("Error getting objects:", error);
+        return res.status(500).json({ error: "Failed to get objects." });
     }
 })
 
