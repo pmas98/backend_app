@@ -10,29 +10,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-/**
- * @swagger
- * /signup:
- *   post:
- *     summary: Create a new user
- *     description: Endpoint to create a new user.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       '200':
- *         description: User created successfully
- *       '400':
- *         description: Error creating user
- */
 router.post("/signup", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -42,48 +19,6 @@ router.post("/signup", async (req, res) => {
 });
 
 
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: User login
- *     description: Endpoint to authenticate a user.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: The user's email address.
- *               password:
- *                 type: string
- *                 format: password
- *                 description: The user's password.
- *     responses:
- *       '200':
- *         description: User authenticated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: Authentication token for the user.
- *       '400':
- *         description: Invalid email or password.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -98,44 +33,6 @@ router.post("/login", async (req, res) => {
     });
 });
 
-/**
- * @swagger
- * /refresh:
- *   post:
- *     summary: Refresh authentication token
- *     description: Endpoint to refresh the authentication token using a refresh token.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refresh_token:
- *                 type: string
- *                 description: The refresh token.
- *     responses:
- *       '200':
- *         description: Token refreshed successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: New authentication token.
- *       '400':
- *         description: Invalid refresh token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.post("/refresh", async (req, res) => {
     const { refresh_token } = req.body;
     refreshToken(refresh_token, res)
@@ -147,44 +44,6 @@ router.post("/refresh", async (req, res) => {
     });
 });
 
-/**
- * @swagger
- * /verifyToken:
- *   post:
- *     summary: Verify authentication token
- *     description: Endpoint to verify the authenticity of an authentication token.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               idToken:
- *                 type: string
- *                 description: The authentication token to verify.
- *     responses:
- *       '200':
- *         description: Token verified successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 uid:
- *                   type: string
- *                   description: User ID extracted from the verified token.
- *       '400':
- *         description: Invalid authentication token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.post("/verifyToken", async (req, res) => {
     const { idToken } = req.body;
 
@@ -196,37 +55,6 @@ router.post("/verifyToken", async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /expo:
- *   get:
- *     summary: Get all expo objects
- *     description: Endpoint to retrieve all expo objects.
- *     responses:
- *       '200':
- *         description: Successful operation.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: The ID of the expo object.
- *                   ... (other properties)
- *       '500':
- *         description: Failed to get expo objects.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.get("/expo", async (req, res) => {
     try {
         const expoCollection = admin.firestore().collection("expo");
@@ -239,54 +67,6 @@ router.get("/expo", async (req, res) => {
     }
 })
 
-/**
- * @swagger
- * /expo:
- *   post:
- *     summary: Add a new expo object
- *     description: Endpoint to add a new expo object.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: The name of the expo object.
- *     responses:
- *       '200':
- *         description: Expo added successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message indicating the expo object was added successfully.
- *       '400':
- *         description: Missing required field or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Failed to add expo object.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.post("/expo", async (req, res) => {
 try {
     const { name } = req.body;
@@ -306,54 +86,6 @@ try {
     }
 });
 
-/**
- * @swagger
- * /expo:
- *   delete:
- *     summary: Delete an expo object
- *     description: Endpoint to delete an expo object.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               id:
- *                 type: string
- *                 description: The ID of the expo object to delete.
- *     responses:
- *       '200':
- *         description: Expo deleted successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message indicating the expo object was deleted successfully.
- *       '400':
- *         description: Missing required field or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Failed to delete expo object.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.delete("/expo", async (req,res) => {
     try {
         const { id } = req.body;
@@ -373,37 +105,6 @@ router.delete("/expo", async (req,res) => {
     }
 })
 
-/**
- * @swagger
- * /obra:
- *   get:
- *     summary: Get all obra objects
- *     description: Endpoint to retrieve all obra objects.
- *     responses:
- *       '200':
- *         description: Successful operation.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: The ID of the obra object.
- *                   ... (other properties)
- *       '500':
- *         description: Failed to get obra objects.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
 router.get("/obra", async (req, res) => {
     try {
         const expoCollection = admin.firestore().collection("obra");
@@ -415,66 +116,7 @@ router.get("/obra", async (req, res) => {
         return res.status(500).json({ error: "Failed to get objects." });
     }
 })
-/**
- * @swagger
- * /obra:
- *   post:
- *     summary: Add a new obra object
- *     description: Endpoint to add a new obra object.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               id:
- *                 type: string
- *                 description: The ID of the obra object.
- *               name:
- *                 type: string
- *                 description: The name of the obra object.
- *               autor:
- *                 type: string
- *                 description: The autor of the obra object.
- *               description:
- *                 type: string
- *                 description: The description of the obra object.
- *               imageURL:
- *                 type: string
- *                 description: The imageURL of the obra object.
- *     responses:
- *       '200':
- *         description: Object added successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message indicating the obra object was added successfully.
- *       '400':
- *         description: Missing required field or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Failed to add obra object.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
+
 router.post("/obra", async (req, res) => {
     try {
         const { id, name, autor, description, imageURL } = req.body;
@@ -512,66 +154,7 @@ router.post("/obra", async (req, res) => {
         }
     });
 
-/**
- * @swagger
- * /obra:
- *   patch:
- *     summary: Update an existing obra object
- *     description: Endpoint to update an existing obra object.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               id:
- *                 type: string
- *                 description: The ID of the obra object to update.
- *               name:
- *                 type: string
- *                 description: The updated name of the obra object.
- *               autor:
- *                 type: string
- *                 description: The updated autor of the obra object.
- *               description:
- *                 type: string
- *                 description: The updated description of the obra object.
- *               imageURL:
- *                 type: string
- *                 description: The updated imageURL of the obra object.
- *     responses:
- *       '200':
- *         description: Object updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message indicating the obra object was updated successfully.
- *       '400':
- *         description: Missing required field or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Failed to update obra object.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
+
 router.patch("/obra", async (req, res) => {
     try {
         const { id, name, autor, description, imageURL } = req.body;
@@ -608,54 +191,7 @@ router.patch("/obra", async (req, res) => {
         res.status(500).json({ error: "Failed to update object." });
         }
 })
-/**
- * @swagger
- * /uploadAudio:
- *   post:
- *     summary: Upload an audio file
- *     description: Endpoint to upload an audio file.
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               audio:
- *                 type: string
- *                 format: binary
- *     responses:
- *       '200':
- *         description: Audio file uploaded successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 imageURL:
- *                   type: string
- *                   description: URL of the uploaded audio file.
- *       '400':
- *         description: No file uploaded or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Error uploading audio file.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
+
 router.post("/uploadAudio", upload.single("audio"), async (req, res) => {
     try {
       const file = req.file;
@@ -690,54 +226,7 @@ router.post("/uploadAudio", upload.single("audio"), async (req, res) => {
     }
   });
 
-/**
- * @swagger
- * /obra:
- *   delete:
- *     summary: Delete an obra object
- *     description: Endpoint to delete an obra object.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               id:
- *                 type: string
- *                 description: The ID of the obra object to delete.
- *     responses:
- *       '200':
- *         description: Object deleted successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message indicating the obra object was deleted successfully.
- *       '400':
- *         description: Missing required field or invalid data.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- *       '500':
- *         description: Failed to delete obra object.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message indicating the reason for the failure.
- */
+
 router.delete("/obra", async (req,res) => {
     try {
         const { id } = req.body;
