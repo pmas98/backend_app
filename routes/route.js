@@ -217,7 +217,6 @@ router.post("/verifyToken", async (req, res) => {
  *                   id:
  *                     type: string
  *                     description: The ID of the expo object.
- *                   ... (other properties)
  *       '500':
  *         description: Failed to get expo objects.
  *         content:
@@ -417,7 +416,7 @@ router.get("/obra", async (req, res) => {
 
 /**
  * @swagger
- * /obra?id:
+ * /obraId:
  *   get:
  *     summary: Get an obra by ID
  *     description: Retrieve an obra from the Firestore collection based on the provided ID.
@@ -442,9 +441,10 @@ router.get("/obra", async (req, res) => {
  *       '500':
  *         description: Internal Server Error - Failed to get obra.
  */
-router.get("/obra", async (req, res) => {
+router.get("/obraId", async (req, res) => {
     try {
         const id = req.query.id; // Retrieve the ID from the query parameter
+
         if (!id) {
             return res.status(400).json({ error: "ID is required" });
         }
@@ -475,9 +475,9 @@ router.get("/obra", async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               id:
+ *               expoId:
  *                 type: string
- *                 description: The ID of the obra object.
+ *                 description: The ID of the expo object.
  *               name:
  *                 type: string
  *                 description: The name of the obra object.
@@ -524,7 +524,7 @@ router.get("/obra", async (req, res) => {
  */
 router.post("/obra", async (req, res) => {
     try {
-        const { id, name, autor, description, imageURL } = req.body;
+        const { expoId, name, autor, description, imageURL } = req.body;
     
         if (!name) {
             return res.status(400).json({ error: "Name is required." });
@@ -538,12 +538,13 @@ router.post("/obra", async (req, res) => {
         if (!imageURL) {
             return res.status(400).json({ error: "ImageURL is required." });
         }
-        if (!id) {
-            return res.status(400).json({ error: "ID is required." });
+        if (!expoId) {
+            return res.status(400).json({ error: "Expo ID is required." });
         }
         
         const expoCollection = admin.firestore().collection("obra");
         const productToAdd = {
+            expoId,
             name,
             autor,
             description,
@@ -558,6 +559,60 @@ router.post("/obra", async (req, res) => {
         res.status(500).json({ error: "Failed to add object." });
         }
     });
+
+/**
+ * @swagger
+ * /expoObras:
+ *   get:
+*          summary: Get Expo Obras
+*          description: Retrieve obras from the expo collection based on expoId
+*          parameters:
+*            - name: expoId
+*              in: query
+*              description: ID of the expo
+*              required: true
+*              type: string
+*          responses:
+*            200:
+*              description: Successful response
+*              schema:
+*                type: array
+*                items:
+*                  type: object
+*            400:
+*              description: Bad request, expoId is required
+*              schema:
+*                type: object
+*                properties:
+*                  error:
+*                    type: string
+ */
+
+    router.get("/expoObras", async (req, res) => {
+        try {
+            const expoId = req.query.expoId;
+    
+            if (!expoId) {
+                return res.status(400).json({ error: "Expo ID is required." });
+            }
+            
+            const expoCollection = admin.firestore().collection("obra");
+            
+            // Query the collection for elements that match the expoId
+            const querySnapshot = await expoCollection.where("expoId", "==", expoId).get();
+            
+            const expoObras = [];
+            querySnapshot.forEach((doc) => {
+                expoObras.push(doc.data());
+            });
+    
+            res.status(200).json(expoObras);
+        } catch (error) {
+            console.error("Error fetching expoObras:", error);
+            res.status(500).json({ error: "Failed to fetch expoObras." });
+        }
+    });
+    
 
 /**
  * @swagger
