@@ -600,13 +600,9 @@ router.post("/obra", async (req, res) => {
             
             // Query the collection for elements that match the expoId
             const querySnapshot = await expoCollection.where("expoId", "==", expoId).get();
-            
-            const expoObras = [];
-            querySnapshot.forEach((doc) => {
-                expoObras.push(doc.data());
-            });
+            const expoList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-            res.status(200).json(expoObras);
+            res.status(200).json(expoList);
         } catch (error) {
             console.error("Error fetching expoObras:", error);
             res.status(500).json({ error: "Failed to fetch expoObras." });
